@@ -1,0 +1,24 @@
+[package]
+name = "simple-rest"
+version = "0.1.0"
+authors = ["scottshotgg"]
+edition = "2018"
+
+[dependencies]
+rocket = "0.3.6"
+rocket_codegen = "0.3.6"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+diesel = { version = "*", features = ["postgres"] }
+diesel_codegen = { version = "*", features = ["postgres"] }
+dotenv = "0.9.0"
+postgres = "0.15"
+r2d2 = "*"
+r2d2-diesel = "*"
+
+
+[dependencies.rocket_contrib]
+version = "*"
+default-features = false
+features = ["json"]

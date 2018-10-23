@@ -1,0 +1,12 @@
+create table users (
+    id varchar not null
+    first_name varchar
+    last_name varchar
+    age smallint
+    address Address
+    hobby varchar
+    email varchar
+    phone_1 varchar
+    phone_1_type
+    phone_1_type
+)
