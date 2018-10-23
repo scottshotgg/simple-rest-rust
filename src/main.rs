@@ -26,11 +26,51 @@ use self::models::User;
 
 #[get("/")]
 fn retrieve_all_users() -> String {
+    use crate::schema::users::dsl::*;
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let connection = PgConnection::establish(&database_url)
+        .expect(&format!("Error connecting to {}", database_url));
+
+    let results = users
+        .filter(id.eq(5))
+        .load::<User>(&connection)
+        .expect("Error loading posts");
+
+    println!("Displaying {} users", results.len());
+    for user in results {
+        println!("{}", user.id);
+        println!("----------\n");
+        println!("{}", user.first_name);
+    }
+
     format!("i werk retrieve all")
 }
 
 #[post("/", data = "<user>")]
 fn create_user(user: Json<User>) -> Json<User> {
+    use crate::schema::users::dsl::*;
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let connection = PgConnection::establish(&database_url)
+        .expect(&format!("Error connecting to {}", database_url));
+
+    let stmt = "INSERT INTO users (id, first_name, last_name, age, hobby, email) VALUES ($1, $2, $3, $4, $5, $6)";
+
+    // https://docs.diesel.rs/diesel/fn.insert_into.html
+    conn.execute(
+        stmt,
+        &[
+            &user.id,
+            &user.first_name,
+            &user.last_name,
+            &user.age,
+            &user.hobby,
+            &user.email,
+        ],
+    )
+    .unwrap();
+
     user
 }
 
@@ -50,25 +90,6 @@ fn delete_user(id: String) -> String {
 }
 
 fn main() {
-    use crate::schema::users::dsl::*;
-    dotenv().ok();
-
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let connection = PgConnection::establish(&database_url)
-        .expect(&format!("Error connecting to {}", database_url));
-
-    let results = users
-        .filter(id.eq(5))
-        .load::<User>(&connection)
-        .expect("Error loading posts");
-
-    println!("Displaying {} posts", results.len());
-    for post in results {
-        println!("{}", post.id);
-        println!("----------\n");
-        println!("{}", post.first_name);
-    }
-
     rocket::ignite()
         .mount(
             "/users",
