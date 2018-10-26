@@ -11,6 +11,7 @@ extern crate rocket;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
+use std::clone::Clone;
 use std::env;
 
 // mod schema;
@@ -33,15 +34,12 @@ fn retrieve_all_users() -> String {
         .expect(&format!("Error connecting to {}", database_url));
 
     let results = users
-        .filter(id.eq(5))
         .load::<User>(&connection)
         .expect("Error loading posts");
 
     println!("Displaying {} users", results.len());
     for user in results {
-        println!("{}", user.id);
-        println!("----------\n");
-        println!("{}", user.first_name);
+        println!("user: {:?}", user);
     }
 
     format!("i werk retrieve all")
@@ -58,18 +56,24 @@ fn create_user(user: Json<User>) -> Json<User> {
     let stmt = "INSERT INTO users (id, first_name, last_name, age, hobby, email) VALUES ($1, $2, $3, $4, $5, $6)";
 
     // https://docs.diesel.rs/diesel/fn.insert_into.html
-    conn.execute(
-        stmt,
-        &[
-            &user.id,
-            &user.first_name,
-            &user.last_name,
-            &user.age,
-            &user.hobby,
-            &user.email,
-        ],
-    )
-    .unwrap();
+    // conn.execute(
+    //     stmt,
+    //     &[
+    //         &user.id,
+    //         &user.first_name,
+    //         &user.last_name,
+    //         &user.age,
+    //         &user.hobby,
+    //         &user.email,
+    //     ],
+    // )
+    // .unwrap();
+
+    diesel::insert_into(users)
+        .values(&user.to_owned())
+        //.on_conflict(user.id)
+        .execute(&connection)
+        .unwrap();
 
     user
 }
